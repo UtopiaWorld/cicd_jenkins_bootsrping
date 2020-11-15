@@ -1,0 +1,6 @@
+---
+- name: restart daemo
+  service: name=daemon-reload state=restarted
+
+- name: restart petclinic
+  service: name=petclinic state=restarted

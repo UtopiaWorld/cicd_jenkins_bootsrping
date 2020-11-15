@@ -1,0 +1,49 @@
+---
+- name: Installs default-jdk and additional packages which allow apt to use packages over HTTPS
+  become: yes
+  apt:
+    name:
+      - default-jdk
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - software-properties-common
+    state: present
+    update_cache: true
+
+
+- name: Add Docker GPG apt Key
+  become: yes
+  apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    state: present
+
+
+- name: Add Docker Repository
+  become: yes
+  apt_repository:
+    repo: deb https://download.docker.com/linux/ubuntu bionic stable
+    state: present
+
+- name: Install docker-ce
+  become: yes
+  apt:
+    name:
+      - docker-ce
+    state: present
+    update_cache: true
+
+- name: Install docker-compose
+  become: yes
+  get_url:
+    url : https://github.com/docker/compose/releases/download/1.27.4/docker-compose-Linux-x86_64
+    dest: /usr/local/bin/docker-compose
+    mode: 'u+x,g+x'
+
+- name: stop and delete if running
+  become: yes
+  shell: docker stop jenkins_container || true && docker rm jenkins_container || true
+
+- name: run jenkins container
+  become: yes
+  shell: sudo docker run -p 8080:8080 -p 50000:50000 -d --name jenkins_container -v jenkins_home:/var/jenkins_home jenkins/jenkins:lts

@@ -1,0 +1,8 @@
+
+- hosts: 34.215.87.141
+  roles:
+    - jenkins
+
+- hosts: 35.164.190.138
+  roles:
+    - petclinic

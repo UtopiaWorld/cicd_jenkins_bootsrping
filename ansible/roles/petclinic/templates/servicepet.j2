@@ -1,0 +1,13 @@
+[Unit]
+Description=Petclinic
+
+[Service]
+WorkingDirectory=/home/ubuntu
+ExecStart=/usr/bin/java -Dspring.profiles.active=mysql -jar app.jar
+User=ubuntu
+Type=simple
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

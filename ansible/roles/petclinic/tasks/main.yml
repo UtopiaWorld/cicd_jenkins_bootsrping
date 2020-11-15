@@ -1,0 +1,59 @@
+---
+- name: Installs default-jdk and additional packages which allow apt to use packages over HTTPS
+  become: yes
+  apt:
+    name:
+      - default-jdk
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - software-properties-common
+    state: present
+    update_cache: true
+
+
+- name: Add Docker GPG apt Key
+  become: yes
+  apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    state: present
+
+
+- name: Add Docker Repository
+  become: yes
+  apt_repository:
+    repo: deb https://download.docker.com/linux/ubuntu bionic stable
+    state: present
+
+- name: Install docker-ce
+  become: yes
+  apt:
+    name:
+      - docker-ce
+    state: present
+    update_cache: true
+
+- name: create service with template
+  become: yes
+  template:
+    src: servicepet.j2
+    dest: /etc/systemd/system/petclinic.service
+
+- name: Install docker-compose
+  become: yes
+  get_url:
+    url : https://github.com/docker/compose/releases/download/1.27.4/docker-compose-Linux-x86_64
+    dest: /usr/local/bin/docker-compose
+    mode: 'u+x,g+x'
+
+- name: create docker-compose file with template
+  template:
+    src: docker-compose.j2
+    dest: /home/ubuntu/docker-compose.yml
+
+- name: stop and delete if running
+  become: yes
+  shell: docker stop mysql5.7 || true && docker rm mysql5.7 || true
+
+- name: run mysql container
+  shell: cd | sudo docker-compose up -d
